@@ -1,0 +1,4494 @@
+:root {
+  /* Interface in Schibsted Grotesk, titles in Literata (a serif drawn for long reading, the voice of the documents
+     the app builds); both bundled with the app (@fontsource), so they work without internet. */
+  --font-ui: "Schibsted Grotesk Variable", "Segoe UI", system-ui, sans-serif;
+  --font-display: "Literata Variable", Georgia, "Times New Roman", serif;
+  font-family: var(--font-ui);
+  font-size: 100%;
+  line-height: 1.5;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Keyboard focus: always visible, in the accent color (lighter on the dark sidebars). :where keeps the specificity
+   at zero, so components can still style their own focus. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+:where(.sidebar, .context-sidebar) :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline-color: var(--sidebar-accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Colors: every color is a CSS variable (--bg, --accent, ...) of the theme chosen in Settings, set on the root by
+   theme.js; transparent shades are mixed from them with color-mix. Native fields without their own colors follow the
+   theme too (:where has no specificity, so any other rule wins). */
+:where(input:not([type="checkbox"], [type="radio"], [type="range"], [type="color"]), textarea, select) {
+  color: var(--text);
+  background-color: var(--surface);
+}
+
+body {
+  margin: 0;
+}
+
+.shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  display: flex;
+  flex: 0 0 232px;
+  flex-direction: column;
+  gap: 2.25rem;
+  padding: 1.5rem 0.85rem;
+  background: var(--sidebar-bg);
+  transition: flex-basis 180ms ease, padding 180ms ease;
+}
+
+.sidebar.collapsed {
+  flex-basis: 72px;
+  padding-right: 0.75rem;
+  padding-left: 0.75rem;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 0;
+  overflow: hidden;
+  padding-left: 0.4rem;
+  color: var(--sidebar-text-strong);
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.brand .logo {
+  flex: 0 0 1.85rem;
+  width: 1.85rem;
+  height: 1.85rem;
+}
+
+.sidebar-toggle {
+  display: grid;
+  place-items: center;
+  flex: 0 0 2rem;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 1px solid var(--sidebar-border);
+  border-radius: 0.35rem;
+  color: var(--sidebar-text-strong);
+  background: transparent;
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.sidebar-toggle:hover,
+.sidebar-toggle:focus-visible {
+  background: var(--sidebar-hover);
+  outline: none;
+}
+
+.sidebar nav {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.sidebar nav a {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  overflow: hidden;
+  padding: 0.55rem 0.8rem;
+  border-radius: 0.3rem;
+  color: var(--sidebar-text);
+  font-size: 0.94rem;
+  text-decoration: none;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+/* The current page is marked like the cursor position in Word's navigation pane: a bar on the left edge. */
+.sidebar nav a.active::before {
+  content: "";
+  position: absolute;
+  top: 0.45rem;
+  bottom: 0.45rem;
+  left: 0;
+  width: 3px;
+  border-radius: 0 2px 2px 0;
+  background: var(--sidebar-accent);
+}
+
+.sidebar.collapsed .brand {
+  width: 0;
+  font-size: 0;
+}
+
+.nav-icon {
+  flex: 0 0 1.25rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sidebar.collapsed nav a {
+  justify-content: center;
+  padding-right: 0.75rem;
+  padding-left: 0.75rem;
+}
+
+.sidebar.collapsed .nav-label {
+  display: none;
+}
+
+.sidebar nav a:hover,
+.sidebar nav a.active {
+  color: var(--sidebar-text-strong);
+  background: var(--sidebar-hover);
+}
+
+.nav-group {
+  display: grid;
+  gap: 0.15rem;
+  margin-top: 0.9rem;
+}
+
+.nav-group-title {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.25rem 0.8rem 0.35rem;
+  color: var(--sidebar-muted);
+  cursor: default;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.sidebar nav a.nav-subitem {
+  margin-left: 0.9rem;
+  padding-top: 0.45rem;
+  padding-bottom: 0.45rem;
+}
+
+/* When collapsed, the group heading becomes a separator: only the item icons stay. */
+.sidebar.collapsed .nav-group-title {
+  justify-content: center;
+  padding: 0.5rem 0 0;
+  border-top: 1px solid var(--sidebar-hover);
+}
+
+.sidebar.collapsed .nav-group-title .nav-icon {
+  display: none;
+}
+
+.sidebar.collapsed nav a.nav-subitem {
+  margin-left: 0;
+}
+
+/* The full width pages (Builder, Compiler, Content) cancel this padding with negative margins of the same
+   variables, so they reach the edges of the window. */
+main {
+  --main-pad-y: 3.5rem;
+  --main-pad-x: clamp(1.5rem, 5vw, 4.5rem);
+  flex: 1;
+  max-width: 1040px;
+  padding: var(--main-pad-y) var(--main-pad-x);
+}
+
+main.word-main {
+  max-width: none;
+}
+
+/* Home: the whole width, with the contents in a centered column. */
+main.home-main {
+  max-width: none;
+}
+
+/* One centered column for the page of the welcome and the rows of features, so their edges line up. */
+.home-page {
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+/* Home hero: a page of a document. The page keeps the paper colors (light also in a dark theme), as the A4 sheet.
+   The ruler has its tick marks between the page margins, with the first line indent marker at the left margin;
+   the style area on the left shows the style of each paragraph, as Word does in draft view. */
+.home-sheet {
+  --surface: var(--paper);
+  --text: var(--paper-text);
+  --text-muted: var(--paper-caption);
+  --sheet-margin: clamp(1.25rem, 6vw, 4.5rem);
+  --style-area: 7.5rem;
+  margin: 0 0 3.5rem;
+  color: var(--paper-text);
+  background: var(--paper);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--shadow) 12%, transparent),
+    0 18px 40px -18px color-mix(in srgb, var(--shadow) 30%, transparent);
+}
+
+.home-ruler {
+  position: relative;
+  height: 1.5rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--paper-border) 40%, var(--paper));
+  background: color-mix(in srgb, var(--paper-border) 22%, var(--paper));
+}
+
+/* Writing area of the ruler (white between the grey margins), with a long tick every 48px and a short one every 12px. */
+.home-ruler::before {
+  content: "";
+  position: absolute;
+  inset: 0 var(--sheet-margin) 0 calc(var(--sheet-margin) + var(--style-area));
+  background:
+    repeating-linear-gradient(to right, var(--paper-caption) 0 1px, transparent 1px 48px) left bottom / 100% 9px no-repeat,
+    repeating-linear-gradient(to right, var(--paper-border) 0 1px, transparent 1px 12px) left bottom / 100% 4px no-repeat,
+    var(--paper);
+}
+
+/* First line indent marker, in the accent color. */
+.home-ruler::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: calc(var(--sheet-margin) + var(--style-area) - 5px);
+  width: 10px;
+  height: 7px;
+  background: var(--accent);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+}
+
+.home-sheet-body {
+  padding: 2.25rem var(--sheet-margin) 2.75rem;
+}
+
+.home-letterhead {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0 0 2.25rem var(--style-area);
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--paper-border) 45%, var(--paper));
+  color: var(--paper-caption);
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.home-logo {
+  width: 1.9rem;
+  height: 1.9rem;
+}
+
+.home-style-row {
+  display: grid;
+  grid-template-columns: var(--style-area) minmax(0, 1fr);
+  align-items: baseline;
+}
+
+.home-style-row + .home-style-row {
+  margin-top: 0.9rem;
+}
+
+/* Style area: the name of the paragraph style, separated from the text by a dotted rule. */
+.home-style-name {
+  align-self: stretch;
+  margin-right: 1.25rem;
+  padding-top: 0.35em;
+  border-right: 1px dotted var(--paper-border);
+  color: var(--paper-caption);
+  font-size: 0.78rem;
+  line-height: 1.2;
+}
+
+.home-sheet h1 {
+  max-width: 20ch;
+  text-wrap: balance;
+  font-size: clamp(2.1rem, 4.6vw, 3.4rem);
+  line-height: 1.05;
+}
+
+.home-subtitle {
+  max-width: 60ch;
+  text-wrap: pretty;
+  margin: 0;
+  color: var(--paper-caption);
+  font-size: 1.15rem;
+  line-height: 1.5;
+}
+
+/* Without room for the style area the page shows the text only. */
+@media (max-width: 720px) {
+  .home-sheet {
+    --style-area: 0rem;
+  }
+
+  .home-style-name {
+    display: none;
+  }
+
+  .home-style-row {
+    display: block;
+  }
+}
+
+/* Home: guide of the workflow, five numbered steps on a rail (a real sequence), each with its text, the link to the
+   page where it is done and a drawing made of theme colors. The step in view gets the accent on the rail. */
+.workflow {
+  margin: 0 0 4rem;
+}
+
+.workflow-heading {
+  max-width: 62ch;
+  margin-bottom: 2rem;
+}
+
+.workflow-heading h2 {
+  margin: 0 0 0.4rem;
+  font-size: clamp(1.6rem, 3vw, 2.1rem);
+  line-height: 1.15;
+}
+
+.workflow-heading span {
+  color: var(--text-secondary);
+  font-size: 1.05rem;
+  line-height: 1.5;
+}
+
+.workflow-steps {
+  position: relative;
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* The rail joining the numbers. */
+.workflow-steps::before {
+  content: "";
+  position: absolute;
+  top: 1.4rem;
+  bottom: 1.4rem;
+  left: calc(1.4rem - 1px);
+  width: 2px;
+  background: var(--border-subtle);
+}
+
+.workflow-step {
+  position: relative;
+  display: grid;
+  grid-template-columns: 2.8rem minmax(0, 1fr) minmax(0, 20rem);
+  align-items: start;
+  gap: 1.25rem 1.75rem;
+  padding: 1.75rem 0;
+}
+
+.workflow-step + .workflow-step {
+  border-top: 1px solid var(--border-subtle);
+}
+
+.workflow-number {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 2.8rem;
+  height: 2.8rem;
+  box-sizing: border-box;
+  border: 2px solid var(--accent-border);
+  border-radius: 50%;
+  color: var(--accent-text);
+  background: var(--bg);
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 600;
+  transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease;
+}
+
+.workflow-step.active .workflow-number {
+  border-color: var(--accent);
+  color: var(--on-color);
+  background: var(--accent);
+}
+
+.workflow-text h3 {
+  margin: 0.45rem 0 0.5rem;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.workflow-text p {
+  max-width: 60ch;
+  margin: 0 0 0.9rem;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.workflow-link {
+  color: var(--accent-text);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+.workflow-link:hover {
+  text-decoration-thickness: 2px;
+}
+
+/* Drawings: small paper-like panels. */
+.workflow-figure {
+  display: grid;
+  min-height: 9.5rem;
+  box-sizing: border-box;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.4rem;
+  background: var(--surface);
+}
+
+.figure-styles {
+  display: grid;
+  gap: 0.35rem;
+  align-content: center;
+}
+
+/* Word file uploaded to Nocument, at the top of the drawing of the first step. */
+.figure-upload {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.45rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.word-tile {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 0.3rem;
+  background: var(--word);
+}
+
+.word-tile .file-icon {
+  width: 1.7rem;
+  height: 1.7rem;
+}
+
+.figure-file {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.upload-arrow {
+  margin-left: auto;
+  color: var(--text-muted);
+}
+
+.figure-logo {
+  flex: none;
+  width: 1.6rem;
+  height: 1.6rem;
+}
+
+.style-sample {
+  color: var(--text);
+  line-height: 1.2;
+}
+
+.style-title {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 600;
+}
+
+.style-heading {
+  color: var(--accent-text);
+  font-weight: 700;
+}
+
+.style-normal {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.style-table {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin-top: 0.3rem;
+  border: 1px solid var(--border);
+}
+
+.style-table.wide {
+  margin-top: 0;
+}
+
+.style-table i {
+  height: 0.75rem;
+  border: 1px solid var(--border-subtle);
+}
+
+.style-table i:nth-child(-n + 3) {
+  background: var(--accent-muted);
+}
+
+.style-caption {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.figure-reuse {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.mini-page {
+  display: grid;
+  gap: 0.3rem;
+  padding: 0.6rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.15rem;
+  background: var(--surface);
+}
+
+.mini-page .line {
+  display: block;
+  height: 0.28rem;
+  border-radius: 1px;
+  background: var(--border);
+}
+
+.mini-page .line.short {
+  width: 60%;
+}
+
+.mini-block {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.3rem;
+  border: 1px dashed var(--accent);
+  border-radius: 0.15rem;
+  background: var(--accent-soft);
+}
+
+.mini-block .line {
+  background: var(--accent-border);
+}
+
+.mini-block .line.heading {
+  width: 70%;
+  background: var(--accent);
+}
+
+.mini-image {
+  height: 1rem;
+  border-radius: 1px;
+  background: var(--accent-muted);
+}
+
+.figure-graph {
+  display: grid;
+  grid-template-columns: 2.1rem 1.1rem 2.1rem 1.1rem 2.1rem;
+  grid-template-rows: 2.1rem 1rem 2.1rem;
+  place-content: center;
+  align-items: center;
+}
+
+.figure-graph .node {
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  box-sizing: border-box;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--node-paragraph);
+  border-radius: 0.25rem;
+  color: var(--text-secondary);
+  background: var(--surface);
+  font-weight: 700;
+}
+
+.figure-graph .node.heading {
+  border-left-color: var(--node-heading);
+  color: var(--accent-text);
+}
+
+.figure-graph .node.table {
+  border-left-color: var(--node-table);
+}
+
+.figure-graph .node.new {
+  border: 1px dashed var(--accent);
+  color: var(--accent-text);
+  background: var(--accent-soft);
+}
+
+.figure-graph .edge {
+  justify-self: center;
+  background: var(--graph-edge);
+}
+
+.figure-graph .edge.horizontal { width: 100%; height: 2px; }
+.figure-graph .edge.vertical { width: 2px; height: 100%; }
+
+.figure-graph .edge.dashed {
+  background: repeating-linear-gradient(to right, var(--accent) 0 3px, transparent 3px 6px);
+}
+
+.figure-graph .at-1-1 { grid-area: 1 / 1; }
+.figure-graph .at-1-2 { grid-area: 1 / 2; }
+.figure-graph .at-1-3 { grid-area: 1 / 3; }
+.figure-graph .at-2-1 { grid-area: 2 / 1; }
+.figure-graph .at-3-1 { grid-area: 3 / 1; }
+.figure-graph .at-3-2 { grid-area: 3 / 2; }
+.figure-graph .at-3-3 { grid-area: 3 / 3; }
+.figure-graph .at-3-4 { grid-area: 3 / 4; }
+.figure-graph .at-3-5 { grid-area: 3 / 5; }
+
+.figure-keywords {
+  display: grid;
+  gap: 0.35rem;
+  align-content: center;
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+.figure-keywords mark {
+  padding: 0 0.15em;
+  border-radius: 0.15rem;
+  color: var(--paper-text);
+  background: var(--highlight);
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 0.85em;
+}
+
+.figure-keywords strong {
+  color: var(--accent-text);
+}
+
+.figure-keywords .muted {
+  margin-top: 0.4rem;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.keyword-arrow,
+.plugin-arrow {
+  color: var(--text-muted);
+  line-height: 1;
+}
+
+.figure-plugin {
+  display: grid;
+  gap: 0.45rem;
+  align-content: center;
+}
+
+.figure-plugin code {
+  display: grid;
+  overflow-x: auto;
+  padding: 0.55rem 0.65rem;
+  border-radius: 0.25rem;
+  color: var(--code-text);
+  background: var(--code-bg);
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.code-line {
+  white-space: nowrap;
+}
+
+.code-line.indent {
+  padding-left: 2ch;
+}
+
+.code-key {
+  color: var(--sidebar-accent);
+}
+
+.home-features-title {
+  margin: 0 0 1.25rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border-subtle);
+  font-size: clamp(1.6rem, 3vw, 2.1rem);
+}
+
+@media (max-width: 900px) {
+  .workflow-step {
+    grid-template-columns: 2.8rem minmax(0, 1fr);
+  }
+
+  .workflow-figure {
+    grid-column: 2;
+    max-width: 24rem;
+  }
+}
+
+/* Home: a row per group of the sidebar (heading with icon, title and description), then the feature cards of the
+   group in columns, "hanging icons" style: the icon stays on the left of the text. The columns have the same width
+   in every row, so the cards line up across the groups. */
+.features + .features {
+  margin-top: 1rem;
+}
+
+.feature-group-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.feature-group-heading h2 {
+  margin: 0 0 0.1rem;
+  font-size: 1.6rem;
+  line-height: 1.2;
+}
+
+.feature-group-description {
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.feature-group-icon {
+  display: inline-flex;
+  flex: 0 0 2.25rem;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.3rem;
+  color: var(--on-color);
+  background: var(--accent);
+}
+
+.feature-group-icon svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  gap: 2rem;
+  padding: 2rem 0;
+}
+
+.feature {
+  display: flex;
+  gap: 1rem;
+}
+
+/* The text takes the whole row height: the button goes to the bottom, aligned across the cards. */
+.feature-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.feature-body .feature-button {
+  margin-top: auto;
+}
+
+.feature-icon {
+  display: inline-flex;
+  align-self: flex-start;
+  flex: 0 0 3rem;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.3rem;
+  color: var(--accent-text);
+  background: var(--accent-muted);
+}
+
+.feature-icon svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.feature h3 {
+  margin: 0 0 0.4rem;
+  font-size: 1.3rem;
+  line-height: 1.25;
+}
+
+.feature span {
+  display: block;
+  max-width: 46ch;
+  margin-bottom: 1rem;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+
+/* The buttons of the cards are outlined: the page has many of them, the filled accent is kept for main actions. */
+.feature .feature-button {
+  padding: calc(0.5rem - 1px) 0.9rem;
+  border: 1px solid var(--accent-border);
+  color: var(--accent-text);
+  background: transparent;
+}
+
+.feature .feature-button:hover {
+  border-color: var(--accent);
+  color: var(--on-color);
+  background: var(--accent);
+}
+
+.feature-button {
+  text-decoration: none;
+}
+
+/* Short lines above the titles say where the page is (e.g. "Documents"), in sentence case. */
+p {
+  margin: 0 0 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+/* Titles in the serif of the documents; the optical size axis adapts its drawing to the size. */
+h1,
+h2,
+.feature h3,
+.explore-card-header h3,
+.explore-card-title,
+.template-card h3,
+.plugin-card h3 {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  font-weight: 600;
+  letter-spacing: -0.012em;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1.1;
+}
+
+.page-heading {
+  margin-bottom: 2.25rem;
+}
+
+.page-heading span {
+  display: block;
+  max-width: 62ch;
+  margin-top: 0.6rem;
+  color: var(--text-muted);
+  font-size: 1.05rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface);
+  text-align: left;
+}
+
+th,
+td {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+th {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.feature-button,
+button {
+  display: inline-block;
+  padding: 0.5rem 0.95rem;
+  border: 0;
+  border-radius: 0.3rem;
+  color: var(--on-color);
+  background: var(--accent);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+
+.feature-button:hover,
+button:hover {
+  background: var(--accent-hover);
+}
+
+.upload-panel {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.file-name {
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+.status,
+.error {
+  padding: 1rem;
+  background: var(--surface);
+}
+
+.error {
+  color: var(--danger-text);
+}
+
+.document-preview {
+  width: 210mm;
+  min-height: 297mm;
+  padding: 20mm;
+  box-sizing: border-box;
+  overflow: auto;
+  background: var(--paper);
+  box-shadow: 0 8px 30px color-mix(in srgb, var(--shadow) 10%, transparent);
+  line-height: 1.6;
+}
+
+.document-preview img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.document-preview table {
+  width: 100% !important;
+  max-width: 100%;
+  table-layout: fixed;
+}
+
+.document-preview th,
+.document-preview td,
+.document-preview p,
+.document-preview li {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.document-preview pre {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.word-page {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--sidebar-width, 20%) minmax(0, 1fr);
+  /* Also takes main's side padding, which the negative margins cancel on both sides. */
+  width: calc(100% + 2 * var(--main-pad-x));
+  height: 100vh;
+  margin: calc(-1 * var(--main-pad-y)) calc(-1 * var(--main-pad-x));
+  overflow: hidden;
+}
+
+.word-page.no-sidebar {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.word-content {
+  min-width: 0;
+  height: 100vh;
+  box-sizing: border-box;
+  overflow: hidden;
+  padding: 2rem clamp(2rem, 5vw, 5rem);
+}
+
+.editor-layout {
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  min-width: 0;
+  width: 100%;
+}
+
+.editor-column {
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  min-width: 0;
+  overflow: hidden;
+  width: 100%;
+}
+
+.document-source {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.pdf-viewer {
+  display: grid;
+  gap: 1.5rem;
+  align-content: start;
+  box-sizing: border-box;
+  height: 100%;
+  max-height: 100%;
+  overflow-y: auto;
+  padding: 0 0.75rem 4rem 0;
+  scrollbar-gutter: stable;
+  width: 100%;
+}
+
+.pdf-page {
+  position: relative;
+  width: min(100%, 210mm);
+  margin: 0 auto;
+  background: var(--paper);
+  box-shadow: 0 8px 30px color-mix(in srgb, var(--shadow) 10%, transparent);
+}
+
+.pdf-page canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.pdf-highlight {
+  position: absolute;
+  z-index: 1;
+  border-radius: 0.15rem;
+  background: color-mix(in srgb, var(--highlight) 55%, transparent);
+  pointer-events: none;
+  height: 100%;
+}
+
+.pdf-highlight.active {
+  z-index: 2;
+  background: color-mix(in srgb, var(--highlight-active) 88%, transparent);
+  box-shadow: 0 0 0 2px var(--highlight-ring), 0 0 18px color-mix(in srgb, var(--highlight-active) 90%, transparent);
+  animation: keyword-focus 900ms ease-out;
+}
+
+@keyframes keyword-focus {
+  0% {
+    opacity: 0.45;
+    transform: scale(1.3);
+  }
+  45% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.context-sidebar {
+  display: grid;
+  align-content: start;
+  gap: 1rem;
+  box-sizing: border-box;
+  height: 100vh;
+  min-width: 0;
+  overflow-y: auto;
+  padding: 1.25rem;
+  color: var(--sidebar-text);
+  background: var(--sidebar-panel-bg);
+}
+.resize-handle {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  bottom: 0;
+  left: var(--sidebar-width, 20%);
+  width: 8px;
+  padding: 0;
+  border-radius: 0;
+  color: transparent;
+  background: transparent;
+  cursor: col-resize;
+  transform: translateX(-50%);
+}
+
+.resize-handle:hover,
+.resize-handle:focus-visible {
+  background: var(--accent);
+  outline: none;
+}
+.upload-empty-state {
+  display: grid;
+  min-height: calc(100vh - 8rem);
+  align-content: center;
+  justify-items: center;
+  text-align: center;
+}
+
+.upload-empty-state .upload-panel {
+  justify-content: center;
+}
+
+.upload-empty-state {
+  border: 2px dashed transparent;
+  border-radius: 0.75rem;
+  transition: border-color 120ms ease-out, background-color 120ms ease-out;
+}
+
+/* Highlight while a file is dragged over. */
+.upload-empty-state.dragging {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+
+.upload-empty-state.dragging * {
+  pointer-events: none;
+}
+
+.context-sidebar p {
+  color: var(--sidebar-muted);
+  margin-bottom: 0.35rem;
+}
+
+.context-sidebar h2 {
+  margin: 0;
+  color: var(--sidebar-text-strong);
+  font-size: 1.25rem;
+}
+
+/* Hyperlinks: toolbar button of the visual editor, links inside the editor and the previews. */
+.rich-text-link svg {
+  width: 1rem;
+  height: 1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vertical-align: -0.15em;
+}
+
+.rich-text-content a,
+.sheet-paragraph a,
+.table-cell-html a,
+.a4-sheet td a {
+  color: var(--accent-text);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+/* Link dialog (LinkDialog), above the modal containing the editor and the cell editor. */
+.link-dialog-backdrop {
+  z-index: 1050;
+}
+
+.link-dialog-frame {
+  width: min(100%, 440px);
+}
+
+.link-dialog {
+  display: grid;
+  gap: 0.85rem;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 1.4rem 1.5rem 1.2rem;
+  border-top: 3px solid var(--accent);
+  border-radius: 0.4rem;
+  background: var(--surface);
+  box-shadow: 0 20px 60px color-mix(in srgb, var(--shadow) 25%, transparent);
+  animation: pop-in 160ms ease-out;
+}
+
+.link-dialog h2 {
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.link-dialog label {
+  display: grid;
+  gap: 0.35rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.link-dialog input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 0.3rem;
+  font: inherit;
+}
+
+.link-dialog-actions,
+.cell-editor-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.link-dialog-actions .remove-content-button {
+  margin: 0 auto 0 0;
+}
+
+.link-dialog-actions .secondary-button,
+.cell-editor-actions .secondary-button {
+  padding: calc(0.5rem - 1px) 0.95rem;
+  font-size: inherit;
+}
+
+/* Cell editor (CellEditorModal), above the content modal of the table. */
+.cell-editor-backdrop {
+  z-index: 1000;
+}
+
+.cell-editor {
+  display: grid;
+  gap: 0.9rem;
+  width: min(100%, 640px);
+}
+
+.cell-editor h2 {
+  font-size: 1.5rem;
+}
+
+.cell-editor .modal-intro {
+  margin: 0;
+}
+
+/* Table grid cell (TableCell): the field, or the preview of a rich cell, with the editor mark in the bottom right
+   corner, drawn like the resize grip of a text area. */
+.table-cell {
+  position: relative;
+  min-width: 6rem;
+}
+
+.table-cell input[type="text"] {
+  padding-right: 1.4rem;
+}
+
+.table-cell-preview {
+  display: block;
+  width: 100%;
+  min-height: 2.1rem;
+  box-sizing: border-box;
+  padding: 0.45rem 1.4rem 0.45rem 0.45rem;
+  border: 0;
+  border-radius: 0;
+  color: var(--text);
+  background: var(--accent-soft);
+  font-weight: 400;
+  text-align: left;
+}
+
+.table-cell-preview:hover {
+  background: var(--accent-muted);
+}
+
+.table-cell-html p {
+  margin: 0;
+  color: inherit;
+  font-size: inherit;
+}
+
+.table-cell-html ul,
+.table-cell-html ol {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.table-cell-expand {
+  position: absolute;
+  right: 1px;
+  bottom: 1px;
+  display: grid;
+  place-items: center;
+  width: 1.1rem;
+  height: 1.1rem;
+  padding: 0;
+  border-radius: 0.15rem;
+  color: var(--text-muted);
+  background: transparent;
+  opacity: 0.75;
+}
+
+.table-cell-expand svg {
+  width: 0.7rem;
+  height: 0.7rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+}
+
+.table-cell:hover .table-cell-expand,
+.table-cell-expand:focus-visible {
+  color: var(--on-color);
+  background: var(--accent);
+  opacity: 1;
+}
+
+.table-cell.rich .table-cell-expand {
+  color: var(--accent-text);
+}
+
+/* Confirmation dialog (ConfirmDialog): above the other modals, short and focused on the two choices. */
+.confirm-backdrop {
+  z-index: 1100;
+}
+
+.confirm-dialog {
+  width: min(100%, 440px);
+  box-sizing: border-box;
+  padding: 1.5rem 1.6rem 1.25rem;
+  border-top: 3px solid var(--accent);
+  border-radius: 0.4rem;
+  background: var(--surface);
+  box-shadow: 0 20px 60px color-mix(in srgb, var(--shadow) 25%, transparent);
+  animation: pop-in 160ms ease-out;
+}
+
+.confirm-dialog.danger {
+  border-top-color: var(--danger);
+}
+
+.confirm-dialog h2 {
+  margin: 0 0 0.6rem;
+  font-size: 1.35rem;
+  line-height: 1.25;
+}
+
+.confirm-message {
+  display: block;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.confirm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1.4rem;
+}
+
+.confirm-actions .secondary-button {
+  padding: calc(0.5rem - 1px) 0.95rem;
+  font-size: inherit;
+}
+
+.confirm-dialog.danger .confirm-button {
+  background: var(--danger);
+}
+
+.confirm-dialog.danger .confirm-button:hover {
+  background: var(--danger-hover);
+}
+
+/* Back arrow (BackButton): on the left of the title of a secondary sidebar, or at the top left of the page. */
+.back-button {
+  display: inline-grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 0.3rem;
+  color: var(--text-muted);
+  background: transparent;
+}
+
+.back-button:hover {
+  border-color: var(--accent-border);
+  color: var(--accent-text);
+  background: var(--accent-soft);
+}
+
+.back-button.on-dark {
+  border-color: var(--sidebar-border);
+  color: var(--sidebar-text);
+}
+
+.back-button.on-dark:hover {
+  border-color: var(--sidebar-muted);
+  color: var(--sidebar-text-strong);
+  background: var(--sidebar-hover);
+}
+
+.back-button svg {
+  width: 1.1rem;
+  height: 1.1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Title of a secondary sidebar with the arrow on its left. */
+.sidebar-title {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 0;
+}
+
+.sidebar-title > div {
+  min-width: 0;
+}
+
+/* Page without a secondary sidebar: the arrow before the line above the title. */
+.page-heading-top {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 0.5rem;
+}
+
+.page-heading-top p {
+  margin: 0;
+}
+
+/* Upload screens (title centered in the page): the arrow at the top left of the page. */
+.upload-empty-state {
+  position: relative;
+}
+
+.page-back {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.home-back:has(.back-button) {
+  margin-bottom: 1rem;
+}
+
+.context-sidebar-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.close-document-button {
+  padding: 0.3rem 0.6rem;
+  border: 1px solid var(--sidebar-muted);
+  color: var(--sidebar-text);
+  background: transparent;
+  font-size: 0.8rem;
+}
+
+.close-document-button:hover {
+  border-color: var(--danger);
+  color: var(--on-color);
+  background: var(--danger);
+}
+
+.keyword-form {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.add-keyword-button {
+  width: 100%;
+  color: var(--sidebar-text-strong);
+  background: var(--sidebar-hover);
+}
+
+.compile-button {
+  width: 100%;
+  color: var(--on-color);
+  background: var(--accent);
+}
+
+.compile-button:disabled,
+.save-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.save-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem;
+}
+
+.save-button {
+  --file-color: var(--accent);
+  --file-color-dark: var(--accent-hover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-width: 0;
+  padding-inline: 0.5rem;
+  color: var(--on-color);
+  background: var(--file-color);
+  white-space: nowrap;
+}
+
+.save-button:hover:not(:disabled) {
+  background: var(--file-color-dark);
+}
+
+/* Format colors: red for PDF, blue for Word. */
+.save-pdf,
+.file-icon-pdf {
+  --file-color: var(--pdf);
+  --file-color-dark: var(--pdf-hover);
+}
+
+.save-word,
+.file-icon-word {
+  --file-color: var(--word);
+  --file-color-dark: var(--word-hover);
+}
+
+.file-icon {
+  flex: none;
+  width: 1.35rem;
+  height: 1.35rem;
+}
+
+.file-icon-page {
+  fill: var(--on-color);
+}
+
+.file-icon-fold {
+  fill: none;
+  stroke: var(--file-color);
+  stroke-width: 1.2;
+  stroke-linejoin: round;
+}
+
+.file-icon text {
+  fill: var(--file-color);
+  font-size: 7px;
+  font-weight: 800;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.file-icon-word text {
+  font-size: 9px;
+}
+
+.keyword-form input {
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.6rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 0.35rem;
+  font: inherit;
+}
+
+.keyword-list {
+  display: grid;
+  gap: 0.4rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.keyword-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.keyword-item {
+  flex: 1;
+  padding: 0.55rem 0.65rem;
+  color: var(--text);
+  background: var(--surface);
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+.keyword-item:hover {
+  color: var(--on-color);
+  background: var(--accent);
+}
+
+.focus-keyword {
+  flex: 0 0 2rem;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 1px solid var(--sidebar-border);
+  border-radius: 0.35rem;
+  color: var(--accent-text);
+  background: var(--surface);
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.focus-keyword:hover,
+.focus-keyword:focus-visible {
+  color: var(--on-color);
+  background: var(--accent);
+  outline: none;
+}
+
+.remove-keyword {
+  padding: 0.3rem 0.55rem;
+  color: var(--danger-text);
+  background: transparent;
+}
+
+.remove-keyword:hover {
+  color: var(--on-color);
+  background: var(--danger);
+}
+
+.empty-keywords {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.keyword-highlight {
+  padding: 0.05em 0.15em;
+  border-radius: 0.2rem;
+  color: var(--paper-text);
+  background: var(--warning);
+}
+
+.keyword-value {
+  display: contents;
+}
+
+.keyword-modal-backdrop {
+  position: fixed;
+  z-index: 10;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: color-mix(in srgb, var(--overlay) 55%, transparent);
+  animation: fade-in 160ms ease-out;
+}
+
+.keyword-modal {
+  position: relative;
+  width: min(100%, 560px);
+  /* Long contents (tables, open plugin panels) scroll inside the modal, which never exceeds the window. */
+  max-height: calc(100vh - 3rem);
+  box-sizing: border-box;
+  overflow: auto;
+  padding: 2rem;
+  background: var(--surface);
+  box-shadow: 0 20px 60px color-mix(in srgb, var(--shadow) 25%, transparent);
+  animation: pop-in 180ms ease-out;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes pop-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.keyword-modal h2 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.modal-intro {
+  display: block;
+  margin: 0.75rem 0 1.5rem;
+  color: var(--text-muted);
+}
+
+.close-modal {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  padding: 0.2rem 0.55rem;
+  color: var(--text-muted);
+  background: transparent;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.close-modal:hover {
+  color: var(--on-color);
+  background: var(--danger);
+}
+
+.content-type-list {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.content-type-list button {
+  border-radius: 0;
+  color: var(--text-muted);
+  background: transparent;
+}
+
+.content-type-list button.active,
+.content-type-list button:hover {
+  color: var(--on-color);
+  background: var(--accent);
+}
+
+.content-form {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.content-form label,
+.table-size-fields label {
+  display: grid;
+  gap: 0.4rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.content-form textarea,
+.content-form input[type="file"],
+.table-size-fields input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 0.35rem;
+  font: inherit;
+}
+
+.table-size-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.image-preview {
+  max-width: 100%;
+  max-height: 180px;
+  object-fit: contain;
+}
+
+.insert-content-button {
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 640px) {
+  .shell {
+    display: block;
+  }
+
+  .sidebar {
+    gap: 1.25rem;
+    padding: 1rem;
+  }
+
+  .sidebar nav {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .nav-group {
+    display: flex;
+    align-items: center;
+  }
+
+  .nav-group-title {
+    padding: 0 0.5rem;
+  }
+
+  .sidebar nav a.nav-subitem {
+    margin-left: 0;
+  }
+
+  main {
+    --main-pad-y: 2rem;
+    --main-pad-x: 1rem;
+  }
+
+  .word-page {
+    display: block;
+    min-height: auto;
+    margin: calc(-1 * var(--main-pad-y)) calc(-1 * var(--main-pad-x));
+  }
+
+  .word-content {
+    padding: 2rem 1rem;
+  }
+
+  .document-preview {
+    width: 100%;
+    min-height: auto;
+    padding: 1.5rem;
+  }
+
+  .editor-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .context-sidebar {
+    min-height: auto;
+  }
+
+  .resize-handle {
+    display: none;
+  }
+}
+
+.compile-error {
+  margin: 0;
+  color: var(--danger-text);
+  font-size: 0.9rem;
+}
+
+.keyword-type {
+  display: inline-block;
+  margin-left: 0.4rem;
+  padding: 0.05rem 0.4rem;
+  border-radius: 0.2rem;
+  color: var(--on-color);
+  background: var(--accent);
+  font-size: 0.75rem;
+  vertical-align: middle;
+}
+
+.keyword-item:hover .keyword-type {
+  color: var(--accent-text);
+  background: var(--surface);
+}
+
+.table-hint {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.keyword-modal.wide {
+  width: min(100%, 1200px);
+  max-height: calc(100vh - 3rem);
+  box-sizing: border-box;
+  overflow: auto;
+}
+
+.csv-import {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+}
+
+.content-form .csv-header-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.column-selection {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.column-selection span {
+  margin-right: auto;
+}
+
+.secondary-button {
+  padding: 0.35rem 0.75rem;
+  border: 1px solid var(--accent);
+  color: var(--accent-text);
+  background: transparent;
+  font-size: 0.85rem;
+}
+
+.secondary-button:hover:not(:disabled) {
+  color: var(--on-color);
+  background: var(--accent);
+}
+
+.secondary-button:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+.table-warning {
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  border-left: 3px solid var(--warning);
+  background: var(--warning-bg);
+  color: var(--warning-text);
+  font-size: 0.9rem;
+}
+
+.table-editor {
+  max-height: 55vh;
+  overflow: auto;
+}
+
+.table-editor thead th {
+  position: sticky;
+  z-index: 1;
+  top: 0;
+  padding: 0.3rem 0.4rem;
+  border: 1px solid var(--border);
+  background: var(--surface-muted);
+  font-size: 0.85rem;
+  text-align: left;
+}
+
+.column-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.column-sort {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 3rem;
+  padding: 0.15rem 0.3rem;
+  color: inherit;
+  background: transparent;
+  font-weight: 600;
+  text-align: left;
+}
+
+.column-sort:hover,
+.column-sort.sorted {
+  color: var(--accent-text);
+  background: var(--accent-muted);
+}
+
+.column-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sort-indicator {
+  flex: none;
+  font-size: 0.75rem;
+}
+
+.table-editor .excluded {
+  opacity: 0.45;
+}
+
+.table-editor .excluded input[type="text"] {
+  text-decoration: line-through;
+}
+
+.table-editor .row-actions {
+  width: 1%;
+  padding: 0 0.2rem;
+  white-space: nowrap;
+}
+
+.icon-button {
+  padding: 0.1rem 0.4rem;
+  color: var(--text-muted);
+  background: transparent;
+  font-weight: 400;
+}
+
+.icon-button:hover:not(:disabled) {
+  color: var(--on-color);
+  background: var(--accent);
+}
+
+.icon-button:disabled {
+  cursor: default;
+  opacity: 0.3;
+}
+
+.icon-button.remove-row:hover {
+  background: var(--danger);
+}
+
+.table-editor table {
+  /* Widths from the <col>s: the table is as wide as the sum of the columns and scrolls horizontally. */
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+.table-editor td {
+  overflow: hidden;
+}
+
+.column-resize-handle {
+  position: absolute;
+  top: 0;
+  right: -4px;
+  bottom: 0;
+  z-index: 2;
+  width: 8px;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  cursor: col-resize;
+  touch-action: none;
+}
+
+.column-resize-handle:hover,
+.column-resize-handle:focus-visible {
+  background: var(--accent);
+  outline: none;
+}
+
+.content-form .apply-widths-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.table-editor td {
+  padding: 0;
+  border: 1px solid var(--border);
+}
+
+.table-editor input[type="text"] {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.45rem;
+  border: 0;
+  font: inherit;
+}
+
+.table-editor input[type="text"]:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.content-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.remove-content-button {
+  margin-top: 0.5rem;
+  color: var(--danger-text);
+  background: transparent;
+}
+
+.remove-content-button:hover {
+  color: var(--on-color);
+  background: var(--danger);
+}
+
+/* ---- Builder ---- */
+
+.builder-page {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--sidebar-width, 280px) minmax(0, 1fr);
+  /* Also takes main's side padding, which the negative margins cancel on both sides. */
+  width: calc(100% + 2 * var(--main-pad-x));
+  height: 100vh;
+  margin: calc(-1 * var(--main-pad-y)) calc(-1 * var(--main-pad-x));
+  overflow: hidden;
+}
+
+/* A column whose last element, the table of contents, fills the free space and scrolls on its own; the other
+   elements keep their height, however many they are. On low screens the table of contents keeps a minimum height
+   and the whole sidebar scrolls instead, so it is never squeezed to nothing. */
+.builder-sidebar {
+  display: flex;
+  flex-direction: column;
+}
+
+.builder-sidebar > * {
+  flex: 0 0 auto;
+}
+
+.builder-sidebar > .toc-panel {
+  flex: 1 0 14rem;
+}
+
+.builder-palette {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.builder-palette .content-palette {
+  gap: 0.3rem;
+}
+
+.builder-palette .palette-item {
+  padding: 0.4rem 0.55rem;
+}
+
+.builder-sidebar h2 {
+  overflow: hidden;
+  font-size: 1rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.close-document-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.toc-title {
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.toc-panel {
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.toc-panel ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* All the entries have the same height, with or without the collapse button. */
+.toc-panel li {
+  display: flex;
+  align-items: stretch;
+  height: 1.9rem;
+  margin-bottom: 0.1rem;
+  padding-left: calc(var(--depth) * 0.9rem);
+}
+
+.toc-toggle,
+.toc-toggle-spacer {
+  flex: 0 0 1.25rem;
+  width: 1.25rem;
+}
+
+.toc-toggle {
+  padding: 0;
+  border-radius: 0.25rem;
+  line-height: 1;
+  color: var(--sidebar-muted);
+  background: transparent;
+  font-size: 0.8rem;
+}
+
+.toc-toggle:hover {
+  color: var(--on-color);
+  background: transparent;
+}
+
+.toc-entry {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  padding: 0 0.5rem;
+  line-height: 1.9rem;
+  border-left: 3px solid transparent;
+  border-radius: 0 0.25rem 0.25rem 0;
+  color: var(--sidebar-text);
+  background: transparent;
+  font-weight: 400;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.toc-entry.top-level {
+  color: var(--sidebar-text-strong);
+  font-weight: 600;
+}
+
+.toc-entry:hover {
+  background: var(--sidebar-hover);
+}
+
+/* Selected entry, as in Word's navigation pane. */
+.toc-entry.active {
+  border-left-color: var(--warning);
+  color: var(--sidebar-text-strong);
+  background: var(--sidebar-hover);
+}
+
+/* Heading selected in the graph (same accent as the selected nodes). */
+.toc-entry.selected {
+  border-left-color: var(--sidebar-accent);
+  color: var(--sidebar-text-strong);
+  background: color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.toc-entry.selected::before {
+  content: "✓ ";
+  color: var(--sidebar-accent);
+}
+
+/* Action bar of an element: style, Edit and Delete, visible on hover or with the focus. */
+.structure-actions {
+  position: absolute;
+  z-index: 1;
+  top: 0.2rem;
+  right: 0.35rem;
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  opacity: 0;
+  transition: opacity 120ms ease-out;
+}
+
+.structure-actions:focus-within {
+  opacity: 1;
+}
+
+.structure-style {
+  padding: 0 0.35rem;
+  border-radius: 0.2rem;
+  color: var(--text-muted);
+  background: var(--chip-bg);
+  font-size: 0.7rem;
+}
+
+.structure-action {
+  padding: 0.1rem 0.4rem;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  background: var(--surface);
+  font-size: 0.8rem;
+  font-weight: 400;
+}
+
+.structure-action:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--on-color);
+  background: var(--accent);
+}
+
+.structure-action.delete:hover:not(:disabled) {
+  border-color: var(--danger);
+  background: var(--danger);
+}
+
+.structure-action:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.builder-action-error {
+  margin-bottom: 0.75rem;
+}
+
+.builder-table-grid .header-row input {
+  font-weight: 700;
+}
+
+/* Insertion zone between two elements: the "+" appears on hover (or with the keyboard focus). */
+.insert-zone {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 0.9rem;
+  margin-left: calc(var(--depth) * 1rem);
+}
+
+.insert-zone::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  border-top: 2px solid var(--accent);
+  opacity: 0;
+  transition: opacity 120ms ease-out;
+}
+
+.insert-button {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 1rem;
+  line-height: 1;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: opacity 120ms ease-out, transform 120ms ease-out;
+}
+
+.insert-zone:hover::before,
+.insert-zone:focus-within::before,
+.insert-zone:hover .insert-button,
+.insert-zone:focus-within .insert-button {
+  opacity: 1;
+  transform: none;
+}
+
+.insert-button:disabled {
+  cursor: not-allowed;
+}
+
+.insert-zone:has(.insert-button:disabled) {
+  pointer-events: none;
+}
+
+/* Insertion modal */
+
+.builder-modal .content-form input[type="text"],
+.builder-modal .content-form input[type="number"],
+.builder-modal .content-form select,
+.formatting-fields input:not([type="checkbox"]),
+.formatting-fields select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: 0.35rem;
+  background: var(--surface);
+  font: inherit;
+}
+
+.builder-modal .table-editor input[type="text"] {
+  padding: 0.45rem;
+  border: 0;
+  border-radius: 0;
+}
+
+.formatting-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0.75rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.35rem;
+}
+
+.formatting-fields legend {
+  padding: 0 0.35rem;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.formatting-fields legend span {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 400;
+}
+
+.color-field {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.formatting-fields .color-field input[type="color"] {
+  height: 2.4rem;
+  padding: 0.15rem;
+}
+
+.formatting-fields .color-field input[type="color"]:disabled {
+  opacity: 0.4;
+}
+
+.builder-table-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 0.75rem;
+}
+
+.builder-table-grid {
+  width: 100%;
+}
+
+.field-label {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.rich-text-editor {
+  border: 1px solid var(--border);
+  border-radius: 0.35rem;
+  background: var(--surface);
+}
+
+.rich-text-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem;
+  padding: 0.35rem;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--surface-muted);
+}
+
+.rich-text-button {
+  min-width: 2rem;
+  padding: 0.25rem 0.5rem;
+  color: var(--text-secondary);
+  background: transparent;
+}
+
+.rich-text-button:hover:not(:disabled),
+.rich-text-button.active {
+  color: var(--on-color);
+  background: var(--accent);
+}
+
+.rich-text-button:disabled {
+  cursor: default;
+  opacity: 0.35;
+}
+
+.rich-text-italic { font-style: italic; }
+.rich-text-underline { text-decoration: underline; }
+.rich-text-strike { text-decoration: line-through; }
+
+.rich-text-separator {
+  width: 1px;
+  margin: 0 0.25rem;
+  background: var(--border);
+}
+
+.rich-text-content {
+  min-height: 9rem;
+  max-height: 40vh;
+  overflow-y: auto;
+  padding: 0.6rem 0.75rem;
+  outline: none;
+}
+
+.rich-text-content p {
+  margin: 0 0 0.5rem;
+}
+
+.rich-text-content:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+
+@media (max-width: 900px) {
+  .builder-page {
+    display: block;
+    height: auto;
+    margin: calc(-1 * var(--main-pad-y)) calc(-1 * var(--main-pad-x));
+    overflow: visible;
+  }
+}
+
+/* ---- Content: Add new content ---- */
+
+.content-page {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--sidebar-width, 300px) minmax(0, 1fr);
+  /* Also takes main's side padding, which the negative margins cancel on both sides. */
+  width: calc(100% + 2 * var(--main-pad-x));
+  height: 100vh;
+  margin: calc(-1 * var(--main-pad-y)) calc(-1 * var(--main-pad-x));
+  overflow: hidden;
+}
+
+.content-sidebar {
+  align-content: start;
+}
+
+.content-field {
+  display: grid;
+  gap: 0.35rem;
+  color: var(--sidebar-text);
+  font-size: 0.85rem;
+}
+
+.content-field input,
+.content-field textarea,
+.content-field select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid var(--sidebar-border);
+  border-radius: 0.35rem;
+  color: var(--sidebar-text-strong);
+  background: var(--sidebar-input-bg);
+  font: inherit;
+  resize: vertical;
+}
+
+.content-field input:focus,
+.content-field textarea:focus,
+.content-field select:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.palette-hint {
+  color: var(--sidebar-muted);
+  font-size: 0.8rem;
+}
+
+.content-palette {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.palette-item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  padding: 0.55rem 0.65rem;
+  border: 1px dashed var(--sidebar-border);
+  color: var(--sidebar-text-strong);
+  background: var(--sidebar-hover);
+  font-weight: 600;
+  text-align: left;
+  cursor: grab;
+}
+
+.palette-item:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.palette-item:active {
+  cursor: grabbing;
+}
+
+.palette-item:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.palette-item small {
+  display: block;
+  color: var(--sidebar-text);
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+
+.palette-item:hover:not(:disabled) small {
+  color: var(--on-color);
+}
+
+.palette-icon {
+  display: grid;
+  flex: 0 0 2rem;
+  place-items: center;
+  height: 2rem;
+  border-radius: 0.3rem;
+  background: var(--sidebar-input-bg);
+  font-size: 1rem;
+}
+
+.content-sidebar-actions {
+  display: grid;
+  gap: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--sidebar-border);
+}
+
+.content-import-button {
+  border-color: var(--sidebar-muted);
+  color: var(--sidebar-text-strong);
+}
+
+.content-sidebar .content-status {
+  margin: 0;
+  color: var(--sidebar-text);
+  font-size: 0.85rem;
+}
+
+.content-sheet-area {
+  height: 100vh;
+  box-sizing: border-box;
+  overflow: auto;
+  padding: 2rem clamp(1rem, 3vw, 3rem) 4rem;
+  background: var(--surface-sunken);
+}
+
+/* A4 sheet (210 x 297 mm) with margins similar to Word's. */
+/* The sheet is a page of the document: it stays as the paper colors (light also in a dark theme, so the colors of
+   the document styles stay readable) and the elements inside it take the paper colors instead of the interface ones. */
+.a4-sheet {
+  --surface: var(--paper);
+  --surface-muted: var(--paper-muted);
+  --chip-bg: var(--paper-muted);
+  --text: var(--paper-text);
+  --text-secondary: var(--paper-text);
+  --text-muted: var(--paper-caption);
+  --border: var(--paper-border);
+  --border-subtle: color-mix(in srgb, var(--paper-border) 45%, var(--paper));
+  --accent-text: var(--accent);
+  --accent-soft: color-mix(in srgb, var(--accent) 8%, var(--paper));
+  --accent-muted: color-mix(in srgb, var(--accent) 15%, var(--paper));
+  position: relative;
+  width: min(210mm, 100%);
+  min-height: 297mm;
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding: 25mm 20mm;
+  color: var(--paper-text);
+  background: var(--paper);
+  box-shadow: 0 8px 30px color-mix(in srgb, var(--shadow) 12%, transparent);
+  font-family: Calibri, Carlito, "Segoe UI", Arial, sans-serif;
+  font-size: 11pt;
+  line-height: 1.4;
+}
+
+.a4-sheet.dragging-over {
+  outline: 2px dashed var(--accent-border);
+  outline-offset: -8px;
+}
+
+.sheet-empty {
+  display: grid;
+  justify-items: center;
+  gap: 0.75rem;
+  padding: 3rem 1.5rem;
+  border: 2px dashed var(--border);
+  border-radius: 0.5rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.sheet-empty.drop-target {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+
+.sheet-empty-button {
+  opacity: 1;
+  transform: none;
+}
+
+/* While dragging, the chosen insertion zone stays visible. */
+.sheet-insert-zone.drop-target::before {
+  opacity: 1;
+  border-top-width: 3px;
+}
+
+.sheet-content {
+  position: relative;
+  padding: 0.25rem 0.4rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+}
+
+.sheet-content:hover,
+.sheet-content:focus-visible {
+  background: var(--accent-soft);
+  outline: 1px solid var(--accent-border);
+}
+
+.sheet-content.dragging {
+  opacity: 0.4;
+}
+
+.sheet-content:hover .sheet-actions,
+.sheet-content:focus-within .sheet-actions {
+  opacity: 1;
+}
+
+.sheet-drag-handle {
+  padding: 0 0.25rem;
+  color: var(--text-muted);
+  cursor: grab;
+}
+
+.sheet-heading {
+  margin: 0.4em 0 0.2em;
+  color: var(--paper-heading);
+  font-weight: 700;
+}
+
+.sheet-heading.level-1 { font-size: 16pt; }
+.sheet-heading.level-2 { font-size: 13pt; }
+.sheet-heading.level-3 { font-size: 12pt; }
+.sheet-heading.level-4 { font-size: 11pt; font-style: italic; }
+
+.sheet-paragraph p {
+  margin: 0 0 0.4em;
+}
+
+.sheet-image img {
+  max-width: 100%;
+  height: auto;
+}
+
+.sheet-table {
+  margin: 0.4em 0;
+}
+
+.sheet-table table {
+  display: inline-table;
+  width: 100%;
+  font-size: 10pt;
+}
+
+.sheet-table td {
+  padding: 0.25rem 0.4rem;
+  border: 1px solid var(--paper-border);
+  text-align: left;
+}
+
+.sheet-table .header-row td {
+  font-weight: 700;
+  background: var(--paper-muted);
+}
+
+.sheet-table figcaption {
+  margin: 0.25rem 0;
+  color: var(--paper-caption);
+  font-size: 9pt;
+  font-style: italic;
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .content-page {
+    display: block;
+    height: auto;
+    margin: calc(-1 * var(--main-pad-y)) calc(-1 * var(--main-pad-x));
+    overflow: visible;
+  }
+
+  .content-sheet-area {
+    height: auto;
+  }
+
+  .a4-sheet {
+    min-height: 60vh;
+    padding: 1.5rem;
+  }
+}
+
+/* TableEditor grid (Builder and Content forms): automatic layout, the action column does not shrink. */
+.table-editor-tool {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.table-editor-tool .table-editor table {
+  table-layout: auto;
+}
+
+.table-editor-tool .row-actions {
+  width: 6.5rem;
+  min-width: 6.5rem;
+}
+
+.table-editor-tool .table-editor td {
+  min-width: 6rem;
+}
+
+.table-row-label {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+/* Modal to import contents from Word */
+.import-modal {
+  display: grid;
+  max-height: calc(100vh - 3rem);
+  grid-template-rows: auto auto auto auto auto minmax(0, 1fr) auto auto;
+  box-sizing: border-box;
+}
+
+.import-groups {
+  display: grid;
+  gap: 1rem;
+  min-height: 0;
+  margin: 0.75rem 0;
+  padding: 0 0.25rem 0 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.import-group {
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--surface);
+}
+
+.import-group.unselected {
+  opacity: 0.55;
+}
+
+.import-group-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--surface-muted);
+}
+
+.import-group-title {
+  flex: 1 1 14rem;
+  min-width: 0;
+  padding: 0.4rem 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: 0.35rem;
+  font: inherit;
+  font-weight: 600;
+}
+
+.import-group-summary {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+/* Scrollable box with the group preview. */
+.import-group-preview {
+  max-height: 220px;
+  overflow-y: auto;
+  padding: 0.75rem 1rem;
+  background: var(--surface-sunken);
+}
+
+.import-group-preview:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.a4-sheet.compact {
+  width: 100%;
+  min-height: 0;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--shadow) 8%, transparent);
+  font-size: 10pt;
+}
+
+.a4-sheet.readonly .sheet-content {
+  cursor: default;
+}
+
+.a4-sheet.readonly .sheet-content:hover {
+  background: none;
+  outline: none;
+}
+
+/* ---- Content: Explore contents ---- */
+
+.explore-summary {
+  max-width: 210mm;
+  margin: 0 auto 1rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.explore-empty {
+  max-width: 210mm;
+  margin: 0 auto;
+  color: var(--text-muted);
+}
+
+.explore-list {
+  display: grid;
+  gap: 1.25rem;
+  max-width: 210mm;
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+}
+
+.explore-card {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--surface);
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--shadow) 6%, transparent);
+}
+
+.explore-card-header {
+  display: grid;
+  gap: 0.35rem;
+  padding: 1rem 1.25rem 0.85rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.explore-card-header h3 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.explore-card-id {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.explore-card-id code {
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.25rem;
+  color: var(--text-secondary);
+  background: var(--chip-bg);
+  font-size: 0.8rem;
+  user-select: all;
+}
+
+.explore-card-description {
+  margin: 0.15rem 0 0;
+  color: var(--text-secondary);
+}
+
+.explore-card-meta {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.explore-card-preview {
+  max-height: 320px;
+}
+
+.explore-more {
+  display: block;
+  margin: 1.5rem auto 0;
+}
+
+.source-filter {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.source-filter legend {
+  margin-bottom: 0.35rem;
+  padding: 0;
+}
+
+.source-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.3rem 0;
+  color: var(--sidebar-text-strong);
+  cursor: pointer;
+}
+
+.source-option input {
+  flex: none;
+  width: auto;
+  margin-top: 0.2rem;
+}
+
+.source-option span {
+  overflow-wrap: anywhere;
+}
+
+.explore-card-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.explore-card-actions .remove-content-button {
+  margin-top: 0;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid var(--danger);
+  font-size: 0.85rem;
+}
+
+/* ---- Choice of the saved contents (Explore contents in pickMode) ---- */
+
+/* Full screen overlay above the page (and above the navigation sidebar). */
+.picker-overlay {
+  position: fixed;
+  z-index: 50;
+  inset: 0;
+  overflow: hidden;
+  background: var(--surface-muted);
+  animation: fade-in 160ms ease-out;
+}
+
+.picker-overlay .content-page {
+  height: 100vh;
+  margin: 0;
+}
+
+/* Space at the end of the list, so the fixed buttons do not cover the last card. */
+.content-page.picking .explore-results {
+  padding-bottom: 7rem;
+}
+
+.explore-card.pickable {
+  cursor: pointer;
+  transition: border-color 120ms ease-out, box-shadow 120ms ease-out;
+}
+
+.explore-card.pickable:hover {
+  border-color: var(--accent);
+}
+
+.explore-card.picked {
+  border-color: var(--success);
+  box-shadow: 0 0 0 2px var(--success), 0 4px 16px color-mix(in srgb, var(--shadow) 8%, transparent);
+}
+
+.explore-card-pick {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  cursor: pointer;
+}
+
+.explore-card-pick input {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.explore-card-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.pick-order {
+  display: grid;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  place-items: center;
+  border-radius: 999px;
+  color: var(--on-color);
+  background: var(--success);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+/* Add and Cancel buttons: fixed at the bottom right, above any element, independent of the layout. */
+.picker-actions {
+  position: fixed;
+  z-index: 1000;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  display: flex;
+  gap: 0.75rem;
+}
+
+.picker-actions button {
+  min-width: 7rem;
+  padding: 0.75rem 1.4rem;
+  border-radius: 999px;
+  color: var(--on-color);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--shadow) 25%, transparent);
+  font-size: 1rem;
+}
+
+.picker-add {
+  background: var(--success);
+}
+
+.picker-add:hover:not(:disabled) {
+  background: var(--success-hover);
+}
+
+.picker-add:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.picker-cancel {
+  background: var(--danger);
+}
+
+.picker-cancel:hover {
+  background: var(--danger-hover);
+}
+
+/* Resizable sidebars must not go below the minimum width of their content. */
+.builder-sidebar,
+.content-sidebar {
+  min-width: 0;
+}
+
+/* On narrow screens the pages with a sidebar have one column: no resize handle. */
+@media (max-width: 900px) {
+  .builder-page > .resize-handle,
+  .content-page > .resize-handle {
+    display: none;
+  }
+}
+
+/* Insertion point chosen while dragging over the content sheet. */
+.insert-zone.drop-target::before {
+  opacity: 1;
+  border-top-width: 3px;
+}
+
+/* ---- Multiple selection in the Builder ---- */
+
+/* Horizontal selection menu. */
+.selection-toolbar {
+  position: sticky;
+  z-index: 3;
+  top: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--accent-border);
+  border-radius: 0.4rem;
+  background: var(--accent-soft);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--shadow) 8%, transparent);
+}
+
+.selection-toolbar span {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.selection-hint {
+  margin-right: auto;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.selection-delete {
+  padding: 0.35rem 0.85rem;
+  background: var(--danger);
+  font-size: 0.85rem;
+}
+
+.selection-delete:hover:not(:disabled) {
+  background: var(--danger-hover);
+}
+
+.selection-delete:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+/* ---- Builder: content graph ---- */
+
+.builder-graph-section {
+  position: relative;
+  min-width: 0;
+  height: 100vh;
+}
+
+/* Status, selection and errors above the graph, at the top left (Expand/Collapse are at the top right). */
+.builder-graph-overlay {
+  position: absolute;
+  z-index: 5;
+  top: 0.75rem;
+  left: 0.75rem;
+  display: grid;
+  gap: 0.5rem;
+  width: min(34rem, calc(100% - 20rem));
+  pointer-events: none;
+}
+
+.builder-graph-overlay > * {
+  margin: 0;
+  pointer-events: auto;
+}
+
+.builder-graph-overlay .selection-toolbar {
+  position: static;
+}
+
+.builder-graph-overlay .builder-action-error {
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.4rem;
+  background: var(--surface);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--shadow) 8%, transparent);
+}
+
+.builder-status {
+  justify-self: start;
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  color: var(--on-color);
+  background: var(--accent);
+  font-size: 0.85rem;
+}
+
+.builder-graph {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: var(--graph-bg);
+  /* Svelte Flow colors (canvas, controls, minimap) from the theme. */
+  --xy-background-color: var(--graph-bg);
+  --xy-background-pattern-color: var(--border);
+  --xy-edge-stroke: var(--graph-edge);
+  --xy-controls-button-background-color: var(--surface);
+  --xy-controls-button-background-color-hover: var(--surface-muted);
+  --xy-controls-button-color: var(--text);
+  --xy-controls-button-color-hover: var(--text);
+  --xy-controls-button-border-color: var(--border-subtle);
+  --xy-controls-box-shadow: 0 0 2px 1px color-mix(in srgb, var(--shadow) 8%, transparent);
+  --xy-minimap-background-color: var(--surface);
+  --xy-minimap-mask-background-color: color-mix(in srgb, var(--bg) 60%, transparent);
+  --xy-minimap-mask-stroke-color: var(--border);
+  --xy-minimap-node-background-color: var(--node-paragraph);
+  --xy-attribution-background-color: color-mix(in srgb, var(--surface) 50%, transparent);
+}
+
+.builder-graph.linking,
+.builder-graph.linking * {
+  cursor: crosshair !important;
+}
+
+.graph-toolbar {
+  display: flex;
+  gap: 0.4rem;
+}
+
+/* Edges only link the nodes visually: the user does not need the handles. */
+.builder-graph .svelte-flow__handle {
+  visibility: hidden;
+}
+
+.builder-graph .svelte-flow__edge-path {
+  stroke: var(--graph-edge);
+  stroke-width: 1.5;
+}
+
+/* Edge from the heading to the first content of its section. */
+.builder-graph .section-edge .svelte-flow__edge-path {
+  stroke: var(--node-heading);
+  stroke-dasharray: 5 4;
+}
+
+/* The Svelte Flow node is only a container: the style is on its content (.graph-node). */
+.builder-graph .svelte-flow__node {
+  padding: 0;
+  border: 0;
+  border-radius: 0.45rem;
+  background: transparent;
+}
+
+.graph-node {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 0.3rem;
+  box-sizing: border-box;
+  width: 260px;
+  height: 76px;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--node-paragraph);
+  border-radius: 0.45rem;
+  color: var(--text);
+  background: var(--surface);
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--shadow) 8%, transparent);
+  cursor: grab;
+  transition: box-shadow 120ms ease-out, border-color 120ms ease-out;
+}
+
+.graph-node.editable {
+  cursor: pointer;
+}
+
+.graph-node:hover {
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--shadow) 14%, transparent);
+}
+
+.graph-node:focus-visible {
+  outline: 3px solid var(--accent-border);
+  outline-offset: 2px;
+}
+
+.graph-node-heading {
+  border-left-color: var(--node-heading);
+  background: color-mix(in srgb, var(--node-heading) calc(14% - var(--level, 1) * 3%), var(--surface));
+}
+
+.graph-node-table {
+  border-left-color: var(--node-table);
+}
+
+.graph-node-image {
+  border-left-color: var(--node-image);
+}
+
+.graph-node-start {
+  grid-template-columns: auto 1fr;
+  grid-template-rows: none;
+  align-items: center;
+  height: 44px;
+  border-left-color: var(--node-start);
+  color: var(--on-color);
+  background: var(--node-start);
+  font-weight: 600;
+}
+
+.graph-node-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.graph-node-icon {
+  flex: 0 0 auto;
+  width: 1.2rem;
+  color: var(--text-muted);
+  font-weight: 700;
+  text-align: center;
+}
+
+.graph-node-start .graph-node-icon {
+  color: var(--warning);
+}
+
+.graph-node-caption {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.graph-node-text {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: 0.85rem;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+.graph-node-heading .graph-node-text {
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+  font-weight: 600;
+}
+
+.graph-node-toggle {
+  flex: 0 0 auto;
+  min-width: 1.6rem;
+  padding: 0.05rem 0.35rem;
+  border: 1px solid var(--accent-border);
+  border-radius: 0.25rem;
+  color: var(--accent-text);
+  background: var(--surface);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.graph-node-toggle:hover {
+  color: var(--on-color);
+  background: var(--accent);
+}
+
+/* Collapsed section: the hidden nodes are "stacked" under the heading. */
+.graph-node.collapsed {
+  box-shadow: 4px 4px 0 -1px var(--surface), 4px 4px 0 0 var(--border), 8px 8px 0 -1px var(--surface), 8px 8px 0 0 var(--border);
+}
+
+.builder-graph .active .graph-node {
+  border-color: var(--warning);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--warning) 55%, transparent);
+}
+
+.builder-graph .multi-selected .graph-node {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+.builder-graph .drop-target .graph-node,
+.builder-graph .link-source .graph-node {
+  outline: 2px dashed var(--accent);
+  outline-offset: 3px;
+}
+
+/* Line from the node to the pointer while dragging. */
+.graph-link {
+  position: absolute;
+  z-index: 6;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.graph-link path {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-dasharray: 6 4;
+}
+
+.graph-link circle {
+  fill: var(--accent);
+}
+
+.graph-menu {
+  position: absolute;
+  z-index: 7;
+  display: grid;
+  min-width: 13rem;
+  padding: 0.35rem;
+  border: 1px solid var(--border);
+  border-radius: 0.45rem;
+  background: var(--surface);
+  box-shadow: 0 12px 32px color-mix(in srgb, var(--shadow) 22%, transparent);
+  animation: pop-in 120ms ease-out;
+}
+
+.graph-menu:focus {
+  outline: none;
+}
+
+.graph-menu-title {
+  margin: 0.35rem 0.5rem 0.25rem;
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 18rem;
+}
+
+.graph-menu-title:not(:first-child) {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.graph-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.55rem;
+  border-radius: 0.3rem;
+  color: var(--text);
+  background: transparent;
+  font-size: 0.9rem;
+  font-weight: 400;
+  text-align: left;
+}
+
+.graph-menu-item:hover:not(:disabled),
+.graph-menu-item:focus-visible {
+  color: var(--on-color);
+  background: var(--accent);
+  outline: none;
+}
+
+.graph-menu-item.danger:hover:not(:disabled),
+.graph-menu-item.danger:focus-visible {
+  background: var(--danger);
+}
+
+.graph-menu-item:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.graph-menu-icon {
+  width: 1.2rem;
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .builder-graph-section {
+    height: 80vh;
+  }
+
+  .builder-graph-overlay {
+    width: calc(100% - 1.5rem);
+  }
+}
+
+/* ---- Builder: PDF preview ---- */
+
+.preview-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  border: 1px solid var(--sidebar-border);
+  color: var(--sidebar-text-strong);
+  background: transparent;
+}
+
+.preview-button:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.preview-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.pdf-preview-backdrop {
+  padding: 1rem;
+}
+
+.pdf-preview-dialog {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  width: min(100%, 1100px);
+  height: min(100%, 96vh);
+  overflow: hidden;
+  border-radius: 0.5rem;
+  background: var(--surface);
+  box-shadow: 0 20px 60px color-mix(in srgb, var(--shadow) 25%, transparent);
+  animation: pop-in 180ms ease-out;
+}
+
+.pdf-preview-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.75rem 0.6rem 1.25rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.pdf-preview-header h2 {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  font-size: 1rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pdf-preview-close {
+  padding: 0.2rem 0.6rem;
+  color: var(--text-muted);
+  background: transparent;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.pdf-preview-close:hover {
+  color: var(--on-color);
+  background: var(--danger);
+}
+
+.pdf-preview-dialog iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: var(--viewer-bg);
+}
+
+/* ---- Builder: moving by dragging from a node to another ---- */
+
+.builder-graph .link-target.link-move .graph-node {
+  outline: 3px solid var(--success);
+  outline-offset: 3px;
+}
+
+.builder-graph .link-target.link-invalid .graph-node {
+  outline: 3px solid var(--danger);
+  outline-offset: 3px;
+  cursor: not-allowed;
+}
+
+.graph-link.invalid path {
+  stroke: var(--danger);
+}
+
+.graph-link.invalid circle {
+  fill: var(--danger);
+}
+
+.graph-link-label {
+  position: absolute;
+  z-index: 7;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.3rem;
+  color: var(--on-color);
+  background: var(--success);
+  font-size: 0.75rem;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.graph-link-label.link-invalid {
+  background: var(--danger);
+}
+
+.graph-link-label.link-noop {
+  background: var(--text-muted);
+}
+
+.graph-notice {
+  position: absolute;
+  z-index: 7;
+  bottom: 1.25rem;
+  left: 50%;
+  margin: 0;
+  padding: 0.5rem 1rem;
+  border-radius: 0.4rem;
+  color: var(--on-color);
+  background: var(--danger);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--shadow) 20%, transparent);
+  font-size: 0.85rem;
+  transform: translateX(-50%);
+  animation: fade-in 150ms ease-out;
+}
+
+
+.graph-notice,
+.builder-status {
+  color: var(--on-color);
+}
+
+/* Elements inside a layout table: dashed border and ⊞ mark in the header. */
+.graph-node.in-layout {
+  border-style: dashed;
+  border-left-style: solid;
+}
+
+.graph-node-layout {
+  flex: 0 0 auto;
+  color: var(--node-table);
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+
+/* ---- Main sidebar: settings menu at the bottom ---- */
+
+/* The sidebar fills the window height (and stays in view while the page scrolls), so the footer sits at the bottom. */
+.sidebar {
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  box-sizing: border-box;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.sidebar nav.sidebar-footer {
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid var(--sidebar-hover);
+}
+
+@media (max-width: 640px) {
+  .sidebar {
+    position: static;
+    height: auto;
+  }
+
+  .sidebar nav.sidebar-footer {
+    margin-top: 0;
+  }
+}
+
+/* ---- Settings ---- */
+
+.settings-sections {
+  display: grid;
+  gap: 1.5rem;
+  max-width: 44rem;
+}
+
+.settings-section {
+  display: grid;
+  gap: 1rem;
+  padding: 1.5rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.5rem;
+  background: var(--surface);
+}
+
+.settings-section-heading h2 {
+  margin: 0 0 0.25rem;
+  font-size: 1.15rem;
+}
+
+.settings-section-heading span {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.settings-options {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.settings-option {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 0.75rem;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.4rem;
+  cursor: pointer;
+}
+
+.settings-option:hover:not(.unavailable) {
+  border-color: var(--accent);
+}
+
+.settings-option.selected {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.settings-option.unavailable {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.settings-option input {
+  grid-row: span 2;
+  accent-color: var(--accent);
+}
+
+.settings-option-name {
+  font-weight: 600;
+}
+
+.settings-option-hint {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.settings-section p {
+  margin: 0;
+}
+
+.settings-saved {
+  color: var(--accent-text);
+  font-size: 0.9rem;
+}
+
+/* Appearance: modes, theme of each mode, list of the themes and editor of the colors of a custom theme. */
+.appearance-modes {
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+}
+
+.appearance-mode-themes,
+.theme-editor-heading {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 0.75rem 1rem;
+}
+
+.appearance-mode-themes label,
+.theme-editor-heading label {
+  display: grid;
+  gap: 0.35rem;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.appearance-mode-themes select,
+.theme-editor-heading select,
+.theme-editor-heading input {
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 0.35rem;
+  font: inherit;
+}
+
+.appearance-themes-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.appearance-themes-heading h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.theme-list {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.theme-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.85rem;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.4rem;
+}
+
+.theme-row.editing {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.theme-swatches {
+  display: inline-flex;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 0.3rem;
+}
+
+.theme-swatches span {
+  width: 0.9rem;
+  height: 1.6rem;
+}
+
+.theme-name {
+  display: grid;
+  flex: 1;
+  min-width: 8rem;
+  font-weight: 600;
+}
+
+.theme-name small {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 400;
+}
+
+.theme-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.theme-editor {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid var(--accent-border);
+  border-radius: 0.45rem;
+  background: var(--surface-muted);
+}
+
+.theme-token-group summary {
+  padding: 0.35rem 0;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.theme-tokens {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+  gap: 0.35rem 1.25rem;
+  padding: 0.25rem 0 0.5rem;
+}
+
+.theme-token {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 5.5rem auto;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+}
+
+.theme-token input[type="color"] {
+  width: 2rem;
+  height: 1.6rem;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+  background: none;
+  cursor: pointer;
+}
+
+.theme-token-hex {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0.2rem 0.35rem;
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 0.8rem;
+}
+
+/* Version: frontend and backend, each with the short commit hash and its date. */
+.version-list {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0;
+}
+
+.version-row {
+  display: grid;
+  grid-template-columns: 8rem minmax(0, 1fr);
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.version-row dt {
+  font-weight: 600;
+}
+
+.version-row dd {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.75rem;
+  margin: 0;
+}
+
+.version-row code {
+  padding: 0.1rem 0.4rem;
+  border-radius: 0.25rem;
+  background: var(--chip-bg);
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 0.9rem;
+}
+
+/* Environment variables: read-only list grouped by section, set ones marked with an accent border and badge. */
+.env-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  font-size: 0.9rem;
+}
+
+.env-summary {
+  color: var(--text-muted);
+}
+
+.env-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+}
+
+.env-filter input {
+  accent-color: var(--accent);
+}
+
+.env-group h3 {
+  margin: 0 0 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.env-list {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0;
+}
+
+.env-variable {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.6rem 0.85rem;
+  border: 1px solid var(--border-subtle);
+  border-left: 3px solid var(--border-subtle);
+  border-radius: 0.4rem;
+}
+
+.env-variable.is-set {
+  border-left-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.env-variable dt {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+}
+
+.env-variable dd {
+  margin: 0;
+  min-width: 0;
+}
+
+.env-variable code {
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 0.85rem;
+  overflow-wrap: anywhere;
+}
+
+.env-badge {
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  background: var(--chip-bg);
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.env-badge.is-set {
+  background: var(--accent);
+  color: var(--on-color);
+}
+
+.env-value {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.75rem;
+}
+
+.env-default,
+.env-description {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+/* ---- Documents: Templates ---- */
+
+.template-import-button {
+  width: 100%;
+}
+
+.templates-results .explore-summary,
+.templates-results .explore-empty,
+.template-notice {
+  max-width: 1100px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.template-notice {
+  margin-bottom: 1rem;
+}
+
+.template-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(17.5rem, 1fr));
+  gap: 1rem;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+}
+
+.template-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+  padding: 1.1rem 1.25rem 1rem;
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--accent);
+  border-radius: 0.5rem;
+  background: var(--surface);
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--shadow) 6%, transparent);
+}
+
+.template-card h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  overflow-wrap: anywhere;
+}
+
+/* Description cut after four lines, so the cards of a row stay similar. */
+.template-card p {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  overflow-wrap: anywhere;
+}
+
+/* The buttons stay at the bottom of the card, whatever the length of the description. */
+.template-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: auto;
+  padding-top: 0.5rem;
+}
+
+.template-card-actions button {
+  white-space: nowrap;
+}
+
+.template-card-actions .secondary-button {
+  padding: calc(0.5rem - 1px) 0.9rem;
+  font-size: inherit;
+}
+
+.template-card-delete {
+  margin-left: auto;
+}
+
+.template-card-delete:hover:not(:disabled) {
+  background: var(--danger);
+}
+
+/* Builder: the document is the editing of a saved template. */
+.template-editing-badge {
+  display: block;
+  margin-top: 0.35rem;
+  overflow: hidden;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  color: var(--on-color);
+  background: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: fit-content;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.preview-button.template-save-button {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.preview-button.template-save-button:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.template-modal input[type="text"] {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 0.35rem;
+  font: inherit;
+}
+
+.template-modal p {
+  margin: 0 0 0.25rem;
+  color: var(--text-muted);
+}
+
+.template-required {
+  color: var(--danger-text);
+}
+
+.template-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+/* Icon inside a sidebar button (e.g. Save as template in the Builder). */
+.button-icon {
+  width: 1.1rem;
+  height: 1.1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.upload-empty-state .upload-panel {
+  flex-wrap: wrap;
+}
+
+/* Alternatives to the upload, as large as the upload button. */
+.upload-empty-state .upload-panel .secondary-button {
+  padding: calc(0.55rem - 1px) 1rem;
+  font-size: inherit;
+  font-weight: 600;
+}
+
+/* ---- Plugins ---- */
+
+.plugin-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.plugin-list,
+.plugin-errors ul {
+  display: grid;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.plugin-card {
+  display: grid;
+  gap: 0.6rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--surface);
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--shadow) 6%, transparent);
+}
+
+.plugin-card.broken {
+  border-color: var(--danger-border);
+}
+
+.plugin-card header {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.plugin-card h2,
+.plugin-card h3 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.plugin-meta {
+  color: var(--text-muted);
+  font-family: ui-monospace, monospace;
+  font-size: 0.8rem;
+}
+
+.plugin-description {
+  margin: 0;
+}
+
+.plugin-compatibilities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.plugin-chip {
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  color: var(--accent-text);
+  background: var(--accent-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.plugin-errors {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 2rem;
+}
+
+.plugin-errors h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.plugin-help {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+/* Installation: drop area with the "+" button, always visible (not only on hover like the insertion points). */
+.plugin-drop-area {
+  display: grid;
+  justify-items: center;
+  gap: 0.75rem;
+  padding: 3rem 1.5rem;
+  border: 2px dashed var(--border);
+  border-radius: 0.75rem;
+  color: var(--text-muted);
+  background: var(--surface);
+  text-align: center;
+  transition: border-color 120ms ease-out, background-color 120ms ease-out;
+}
+
+.plugin-drop-area.dragging {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+
+.plugin-drop-area.dragging * {
+  pointer-events: none;
+}
+
+.plugin-drop-area .plugin-add-button {
+  width: 3.5rem;
+  height: 3.5rem;
+  font-size: 2rem;
+  opacity: 1;
+  transform: none;
+}
+
+.plugin-link {
+  margin-left: 0.5rem;
+  color: var(--accent-text);
+  font-weight: 600;
+}
+
+.plugin-guide,
+.plugin-try {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 2rem;
+}
+
+.plugin-guide h2,
+.plugin-try h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.plugin-guide pre {
+  margin: 0;
+  overflow-x: auto;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  color: var(--code-text);
+  background: var(--code-bg);
+  font-size: 0.85rem;
+}
+
+.plugin-preview {
+  max-height: 420px;
+  border-radius: 0.5rem;
+}
+
+/* Parameter form of a plugin (also in the content modal). */
+.plugin-form {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.plugin-form label {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.plugin-form .plugin-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Plugin parameters and plugin choice: the same fields as the editors, wherever the plugin form appears (content
+   modal of the Builder and of the content blocks, Compiler, plugin page). */
+.plugin-form input:not([type="checkbox"]),
+.plugin-form select,
+.plugin-form textarea,
+.plugin-panel-body > label select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 0.3rem;
+  color: var(--text);
+  background: var(--surface);
+  font: inherit;
+}
+
+/* "From plugin" section of the content modal, closed by default. */
+.plugin-panel {
+  margin: 0.75rem 0;
+  padding: 0.6rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--surface-muted);
+}
+
+.plugin-panel[open] {
+  padding-bottom: 0.9rem;
+}
+
+.plugin-panel summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.plugin-panel-body {
+  display: grid;
+  gap: 0.6rem;
+  margin-top: 0.6rem;
+}
+
+.plugin-panel-body > label {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.plugin-panel-actions {
+  display: flex;
+  justify-content: flex-end;
+}

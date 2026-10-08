@@ -1,0 +1,9 @@
+__pycache__
+.env
+.venv/
+web/node_modules/
+web/dist/
+# Server settings (see src/settings.py)
+instance/
+# Private Word templates kept only on this machine
+templates/local/

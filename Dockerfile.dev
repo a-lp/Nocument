@@ -1,0 +1,40 @@
+# Development image: Python + Node runtimes only.
+# Python/npm libraries come from the mounted project (.venv, web/node_modules).
+#
+#   docker build -f Dockerfile.dev -t nocument-dev .
+#   docker run --rm -it -p 5173:5173 -v "$PWD":/app nocument-dev
+#
+# Debian bookworm's python3 (3.11, /usr/bin/python3) matches the interpreter
+# the host .venv was created with, so the mounted venv works as-is.
+FROM node:22-bookworm-slim
+
+# LibreOffice is a system tool (not a Python library) needed for DOCX -> PDF;
+# python3-uno lets the backend drive it to update tables of contents (see libreoffice_toc.py);
+# git gives the version (commit) shown in Settings, read from the mounted project
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        git \
+        python3 \
+        python3-venv \
+        libreoffice-writer-nogui \
+        python3-uno \
+        fonts-dejavu \
+        fonts-liberation \
+        fonts-liberation2 \
+        fonts-crosextra-carlito \
+        fonts-crosextra-caladea \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    SOFFICE_PATH=/usr/bin/soffice
+
+COPY --chmod=755 docker/entrypoint.dev.sh /entrypoint.dev.sh
+
+# The base image's "node" user has uid/gid 1000, so files written to the
+# mounted project stay owned by the host user
+USER node
+WORKDIR /app
+
+EXPOSE 5173
+
+CMD ["/entrypoint.dev.sh"]
