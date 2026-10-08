@@ -1,0 +1,12 @@
+.git
+.vscode
+.env
+.venv
+**/__pycache__
+web/node_modules
+web/dist
+templates
+Dockerfile
+Dockerfile.dev
+.dockerignore
+instance

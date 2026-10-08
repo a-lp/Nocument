@@ -1,0 +1,4 @@
+Flask
+python-docx
+pymongo
+pywin32==311; sys_platform == "win32"

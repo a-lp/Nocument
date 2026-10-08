@@ -1,0 +1,49 @@
+# Development: dev image (Python + Node + LibreOffice, project mounted with auto-reload) and MongoDB.
+#
+#   docker compose -f compose.dev.yaml up --build
+#
+# The app is reachable on http://localhost:5173. MongoDB is also published on 127.0.0.1:27017, so a backend
+# started on the host (MONGODB_URI=mongodb://localhost:27017) or a client like MongoDB Compass can use it.
+# Other ports: NOCUMENT_DEV_PORT and MONGODB_DEV_PORT.
+services:
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    image: nocument-dev
+    ports:
+      - "${NOCUMENT_DEV_PORT:-5173}:5173"
+    # Optional variables of the backend (see .env.example); those under environment win over .env.
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      - .:/app
+    environment:
+      MONGODB_URI: mongodb://mongo:27017
+      MONGODB_DATABASE: nocument
+    depends_on:
+      - mongo
+    networks:
+      - nocument-net
+
+  mongo:
+    image: mongo:7
+    ports:
+      - "127.0.0.1:${MONGODB_DEV_PORT:-27017}:27017"
+    volumes:
+      - mongo-dev-data:/data/db
+    networks:
+      - nocument-net
+
+volumes:
+  mongo-dev-data:
+
+# Explicit subnet, different from the production one (10.40.0.0/24) so the two stacks can run together; change it
+# if another network of the host already uses it.
+networks:
+  nocument-net:
+    name: nocument-net
+    ipam:
+      config:
+        - subnet: 10.40.1.0/24
